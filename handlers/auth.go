@@ -1,0 +1,80 @@
+package handlers
+
+import (
+	"net/http"
+	"simple-api/models"
+
+	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm/utils"
+	"honnef.co/go/tools/config"
+)
+
+//signup
+func Signup(c *gin.Context) {
+	var input models.SignupInput
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	//check if user alredy exists
+	var  existingUser models.User
+	if err := config.DB.Where("email = ?", input.Email).First(&existingUser).Error; err == nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Email alredy registerd"})
+		return
+	}
+
+	//hash password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Passowrd), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.h{"error": "Failed to hash password"})
+		return
+	}
+
+	user := models.User {
+		Name: input.Name,
+		Email: input.Email,
+		Password: string(hashedPassword),
+	}
+
+	if err := config.DB.Create(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user"})
+		return
+	}
+
+	token, err := utils.GenerateJWT(user.ID, user.Email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "User created successfully",
+		"token": token,
+		"user": gin.H{
+			"id": user.ID,
+			"name": user.Name,
+			"email": user.Email,
+		},
+	})
+}
+
+func Login(c *gin.Context) {
+	var input models.LoginInput
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var user models.User
+	if err := config.DB.where("email=?", input.Email).First(&user).Error; err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+		return
+	}
+
+	//compare password
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte)
+}
