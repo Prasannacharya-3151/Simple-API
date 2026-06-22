@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm/utils"
-	"honnef.co/go/tools/config"
 )
 
 //signup
@@ -22,14 +21,14 @@ func Signup(c *gin.Context) {
 	//check if user alredy exists
 	var  existingUser models.User
 	if err := config.DB.Where("email = ?", input.Email).First(&existingUser).Error; err == nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "Email alredy registerd"})
+		c.JSON(http.StatusConflict, gin.H{"error": "Email already registerd"})
 		return
 	}
 
 	//hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Passowrd), bcrypt.DefaultCost)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.h{"error": "Failed to hash password"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
 		return
 	}
 
@@ -76,5 +75,30 @@ func Login(c *gin.Context) {
 	}
 
 	//compare password
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte)
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":"Login successful",
+		"token": token,
+		"user": gin.H{
+			"id": user.ID,
+			"name": user.Name,
+			"email": user.Email,
+		},
+	})
+}
+
+//profile (protected route example)
+func Profile(c *gin.Context) {
+	userID, _ := c.Get("user_id")
+	email, _ := c.Get("email")
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "welcome to your profile",
+		"user_id": userID,
+		"email":email,
+	})
 }
