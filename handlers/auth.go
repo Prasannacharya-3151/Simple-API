@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"simple-api/config"
 	"simple-api/models"
 
 	"github.com/gin-gonic/gin"
@@ -72,7 +73,7 @@ func Login(c *gin.Context) {
 	}
 
 	var user models.User
-	if err := config.DB.where("email=?", input.Email).First(&user).Error; err != nil {
+	if err := config.DB.Where("email=?", input.Email).First(&user).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
 		return
 	}
