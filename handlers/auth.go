@@ -10,9 +10,12 @@ import (
 )
 
 //signup
-func Signup(c *gin.Context) {
-	var input models.SignupInput
-
+func Signup(c *gin.Context) {  //c *gin.Context which containes a request, header, body, response
+	var input models.SignupInput //which creates a empty struct like a name, email, password in the empty string
+    //we can wrie like this also 
+	//if err :=
+	//var err error
+	//err = someFunction()
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -37,7 +40,7 @@ func Signup(c *gin.Context) {
 		Email: input.Email,
 		Password: string(hashedPassword),
 	}
-
+    //create user
 	if err := config.DB.Create(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user"})
 		return
