@@ -32,7 +32,7 @@ type User struct { //for this struct stores in the db for the database perpose
 type SignupInput struct {
 	Name	string `json:"name" binding:"required"`
 	Email	 string `json:"email" binding:"required,email"`
-	Passowrd string `json:"passowrd" binding:"required,min=6"`
+	Passowrd string `json:"password" binding:"required,min=6"`
 }
 
 type LoginInput struct {

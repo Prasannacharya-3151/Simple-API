@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"simple-api/config"
 	"simple-api/models"
+	"simple-api/utils"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm/utils"
 )
 
 //signup
@@ -81,6 +81,12 @@ func Login(c *gin.Context) {
 	//compare password
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+		return
+	}
+
+	token, err := utils.GenerateJWT(user.ID, user.Email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate a token"})
 		return
 	}
 

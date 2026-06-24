@@ -2,17 +2,18 @@ package routes
 
 import (
 	"simple-api/handlers"
+	"simple-api/middleware"
 
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/gin-gonic/gin"
 )
 
-func main() {
+func SetupRoutes(r *gin.Engine) {
 	api := r.Group("/api")
 	{
 		api.POST("/signup", handlers.Signup)
-		api.POST("/signin", handlers.Login)
+		api.POST("/login", handlers.Login)
 
-		//protected routes grp
+		//protected router group
 		protected := api.Group("/")
 		protected.Use(middleware.AuthMiddleware())
 		{

@@ -27,3 +27,18 @@ func GenerateJWT(userID uint, email string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(secret)
 }
+
+func ValidateJWT(tokenStr string) (*Claims, error) {
+	secret := []byte(os.Getenv("JWT_SECRET"))
+	claims := &Claims{} //which wil creates a enpty struct Claims{ USerID:0, Email:"",}
+
+	token, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (interface{}, error) {
+		return secret, nil
+	})
+
+	if err != nil || !token.Valid{
+		return nil, err
+	}
+
+	return claims, nil
+}
