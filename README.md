@@ -577,8 +577,4 @@ This project demonstrates:
 - Environment Variables
 - Clean Project Structure
 
----
 
-# 📄 License
-
-This project was created for learning and educational purposes.
